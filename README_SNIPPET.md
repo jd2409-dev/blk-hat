@@ -1,30 +1,36 @@
-# BLK-HAT + Hexstrike (Windows)
+# BLK-HAT + Hexstrike Quickstart (Windows)
 
-`README_SNIPPET.md` is a copy-ready quickstart for this repo.
+This snippet is the working path for this repo as of 2026-03-07.
 
-## Prerequisites
+## 1) Prerequisites
 
 - Python 3.9+
 - Git
 - Ollama installed (`ollama --version`)
-- Local Hexstrike checkout in `./hexstrike`
 
-## Setup
+## 2) One-time setup
 
 ```powershell
 cd C:\Users\Jaydan\hexstrike
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install requests
+python -m pip install --upgrade pip
+python -m pip install requests
 ```
 
-If Hexstrike is missing:
+## 3) Start Ollama and pull a model
 
 ```powershell
-git clone https://github.com/0x4m4/hexstrike-ai.git hexstrike
+ollama serve
 ```
 
-## Configure once
+In a second terminal:
+
+```powershell
+ollama pull llama3.2
+```
+
+## 4) Save config (works even if `.\hexstrike` is missing initially)
 
 ```powershell
 python .\ollama_hexstrike_cli.py --config `
@@ -36,25 +42,36 @@ python .\ollama_hexstrike_cli.py --config `
   --hexstrike-repo .\hexstrike
 ```
 
-## Run options
+## 5) Run (recommended)
+
+This command auto-clones Hexstrike if missing, installs Hexstrike deps, and auto-starts Hexstrike:
 
 ```powershell
-# GUI wrapper
-.\blk-hat.cmd
-
-# Simple launcher
-.\hexstrike.cmd
-
-# One-shot prompt
-python .\ollama_hexstrike_cli.py --prompt "Analyze scan approach for example.com"
-
-# Prompt from file
-python .\ollama_hexstrike_cli.py --file .\input.txt
+python .\ollama_hexstrike_cli.py `
+  --clone-hexstrike `
+  --auto-start-hexstrike `
+  --install-hexstrike-deps `
+  --prompt "Analyze scan approach for example.com"
 ```
 
-## Notes
+## 6) Equivalent launcher
 
-- Default Hexstrike endpoint is `/api/intelligence/analyze-target`.
-- Use `--verbose` for troubleshooting.
-- `run_hexstrike.bat` is still available for batch-driven startup.
-- Last updated: 2026-03-07.
+```powershell
+.\run_hexstrike.bat --clone-hexstrike --prompt "Analyze scan approach for example.com"
+```
+
+## Optional: BLK-HAT wrapper
+
+`.\blk-hat.cmd` / `.\hexstrike.cmd` runs `blk_hat_app.py repl`. It also requires:
+- Python packages: `typer`, `requests`, and `gpt4all`
+- A local GPT4All model file matching the default name in `blk_hat_app.py`
+
+## Troubleshooting
+
+- Add `--verbose` to `ollama_hexstrike_cli.py` for detailed logs.
+- If Ollama is unreachable, verify `http://localhost:11434`.
+- If Hexstrike startup fails, run it manually from `.\hexstrike`:
+
+```powershell
+python .\hexstrike\hexstrike_server.py
+```
