@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+# BLK-HAT CLI - Unified entry point
+# Usage: ./blk-hat [options]
+#
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+APP="blk_hat_app.py"
+
+if [ ! -f "$APP" ]; then
+    echo "ERROR: Cannot find blk_hat_app.py in $SCRIPT_DIR"
+    exit 1
+fi
+
+check_python() {
+    if command -v python3 &> /dev/null; then
+        PYTHON_CMD="python3"
+    elif command -v python &> /dev/null; then
+        PYTHON_CMD="python"
+    else
+        echo "ERROR: Python not found. Install python3."
+        exit 1
+    fi
+}
+
+install_deps() {
+    echo "Installing/verifying dependencies..."
+    $PYTHON_CMD -m pip install --quiet gpt4all typer requests 2>/dev/null || true
+}
+
+check_server() {
+    if curl -s --connect-timeout 2 http://127.0.0.1:8888/health > /dev/null 2>&1; then
+        return 0
+    fi
+    return 1
+}
+
+start_server() {
+    echo "Starting HexStrike server..."
+    nohup $PYTHON_CMD hexstrike/hexstrike_server.py > /tmp/hexstrike.log 2>&1 &
+    sleep 3
+    
+    for i in {1..30}; do
+        if check_server; then
+            echo "HexStrike server running on http://127.0.0.1:8888"
+            return 0
+        fi
+        sleep 1
+    done
+    
+    echo "ERROR: Failed to start HexStrike server"
+    echo "Check /tmp/hexstrike.log for details"
+    cat /tmp/hexstrike.log 2>/dev/null | tail -20 || true
+    exit 1
+}
+
+main() {
+    check_python
+    
+    if ! $PYTHON_CMD -c "import gpt4all, typer, requests" 2>/dev/null; then
+        install_deps
+    fi
+    
+    if ! check_server; then
+        start_server
+    fi
+    
+    exec $PYTHON_CMD "$APP" "$@"
+}
+
+main "$@"

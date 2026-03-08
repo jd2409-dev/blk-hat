@@ -58,7 +58,8 @@ curl http://127.0.0.1:8888/health
 ## Run the GPT4All + Hexstrike CLI
 
 ```bash
-python3 blk_hat_app.py repl \
+chmod +x blk-hat
+./blk-hat repl \
   --model mistral-7b-instruct-v0.1.Q4_0.gguf \
   --hexstrike-url http://127.0.0.1:8888 \
   --hexstrike-endpoint /api/command \

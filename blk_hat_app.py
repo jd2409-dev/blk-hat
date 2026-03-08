@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """BLK-HAT CLI.
 
 Terminal chat interface for local model + Hexstrike orchestration.
@@ -15,6 +15,7 @@ import sys
 import time
 from urllib.parse import urlparse
 from collections import namedtuple
+
 try:
     from typing import Annotated
 except ImportError:  # pragma: no cover - Python < 3.9 fallback
@@ -59,74 +60,275 @@ DEFAULT_CONFIRM_PENTEST_TOOLS = True
 STRICT_APPROVAL_FOR_NONSAFE_COMMANDS = True
 
 SAFE_COMMAND_HEADS = {
-    "netstat", "tasklist", "ipconfig", "systeminfo", "whoami",
-    "hostname", "ping", "tracert", "route", "arp", "nslookup",
+    "netstat",
+    "tasklist",
+    "ipconfig",
+    "systeminfo",
+    "whoami",
+    "hostname",
+    "ping",
+    "tracert",
+    "route",
+    "arp",
+    "nslookup",
 }
 SAFE_COMMAND_HEADS_POSIX = {
-    "ss", "netstat", "lsof", "ps", "whoami", "hostname",
-    "ping", "ip", "route", "arp", "nslookup", "cat",
-    "grep", "awk", "sed", "ls", "find",
+    "ss",
+    "netstat",
+    "lsof",
+    "ps",
+    "whoami",
+    "hostname",
+    "ping",
+    "ip",
+    "route",
+    "arp",
+    "nslookup",
+    "cat",
+    "grep",
+    "awk",
+    "sed",
+    "ls",
+    "find",
 }
 
 PENTEST_TOOL_HEADS = {
     # Recon and network
-    "nmap", "masscan", "rustscan", "amass", "subfinder", "fierce", "dnsenum", "autorecon",
-    "theharvester", "arp-scan", "nbtscan", "rpcclient", "enum4linux", "enum4linux-ng",
-    "smbmap", "responder", "netexec", "crackmapexec",
+    "nmap",
+    "masscan",
+    "rustscan",
+    "amass",
+    "subfinder",
+    "fierce",
+    "dnsenum",
+    "autorecon",
+    "theharvester",
+    "arp-scan",
+    "nbtscan",
+    "rpcclient",
+    "enum4linux",
+    "enum4linux-ng",
+    "smbmap",
+    "responder",
+    "netexec",
+    "crackmapexec",
     # Web and API security
-    "dirbuster", "gobuster", "feroxbuster", "dirsearch", "ffuf", "dirb", "httpx", "katana", "hakrawler",
-    "gau", "waybackurls", "nuclei", "nikto", "sqlmap", "wpscan", "arjun", "paramspider",
-    "x8", "jaeles", "dalfox", "wafw00f", "testssl", "testssl.sh", "sslscan", "sslyze",
-    "anew", "qsreplace", "uro", "whatweb", "jwt-tool", "graphql-voyager", "zap", "zaproxy",
-    "owasp-zap", "burp", "burpsuite", "burpsuite_pro", "wfuzz", "commix", "nosqlmap", "tplmap",
-    "xsstrike", "ssrfmap",
+    "dirbuster",
+    "gobuster",
+    "feroxbuster",
+    "dirsearch",
+    "ffuf",
+    "dirb",
+    "httpx",
+    "katana",
+    "hakrawler",
+    "gau",
+    "waybackurls",
+    "nuclei",
+    "nikto",
+    "sqlmap",
+    "wpscan",
+    "arjun",
+    "paramspider",
+    "x8",
+    "jaeles",
+    "dalfox",
+    "wafw00f",
+    "testssl",
+    "testssl.sh",
+    "sslscan",
+    "sslyze",
+    "anew",
+    "qsreplace",
+    "uro",
+    "whatweb",
+    "jwt-tool",
+    "graphql-voyager",
+    "zap",
+    "zaproxy",
+    "owasp-zap",
+    "burp",
+    "burpsuite",
+    "burpsuite_pro",
+    "wfuzz",
+    "commix",
+    "nosqlmap",
+    "tplmap",
+    "xsstrike",
+    "ssrfmap",
     # Vulnerability scanners
-    "nessus", "openvas", "gvm", "gvm-cli",
+    "nessus",
+    "openvas",
+    "gvm",
+    "gvm-cli",
     # Password/auth
-    "hydra", "john", "john-the-ripper", "hashcat", "medusa", "patator", "evil-winrm",
-    "hash-identifier", "hashid", "ophcrack",
+    "hydra",
+    "john",
+    "john-the-ripper",
+    "hashcat",
+    "medusa",
+    "patator",
+    "evil-winrm",
+    "hash-identifier",
+    "hashid",
+    "ophcrack",
     # Exploitation frameworks
-    "msfconsole", "msfvenom", "metasploit", "searchsploit", "empire", "covenant",
+    "msfconsole",
+    "msfvenom",
+    "metasploit",
+    "searchsploit",
+    "empire",
+    "covenant",
     # Reversing and binary
-    "gdb", "gdb-peda", "gdb-gef", "radare2", "r2", "ghidra", "ida", "ida64", "binaryninja",
-    "binwalk", "ropgadget", "ropper", "one_gadget", "one-gadget", "checksec", "objdump",
-    "readelf", "xxd", "hexdump", "pwntools", "angr", "pwninit", "upx", "strings",
+    "gdb",
+    "gdb-peda",
+    "gdb-gef",
+    "radare2",
+    "r2",
+    "ghidra",
+    "ida",
+    "ida64",
+    "binaryninja",
+    "binwalk",
+    "ropgadget",
+    "ropper",
+    "one_gadget",
+    "one-gadget",
+    "checksec",
+    "objdump",
+    "readelf",
+    "xxd",
+    "hexdump",
+    "pwntools",
+    "angr",
+    "pwninit",
+    "upx",
+    "strings",
     # Forensics and stego
-    "volatility", "volatility3", "foremost", "photorec", "testdisk", "steghide", "stegsolve",
-    "zsteg", "outguess", "exiftool", "scalpel", "bulk_extractor", "autopsy", "sleuthkit",
-    "tsk_recover", "fls", "icat",
+    "volatility",
+    "volatility3",
+    "foremost",
+    "photorec",
+    "testdisk",
+    "steghide",
+    "stegsolve",
+    "zsteg",
+    "outguess",
+    "exiftool",
+    "scalpel",
+    "bulk_extractor",
+    "autopsy",
+    "sleuthkit",
+    "tsk_recover",
+    "fls",
+    "icat",
     # Cloud/container/k8s
-    "prowler", "scout-suite", "cloudmapper", "pacu", "trivy", "clair", "kube-hunter",
-    "kube-bench", "docker-bench-security", "falco", "checkov", "terrascan", "cloudsploit",
-    "kubectl", "helm", "istioctl", "opa",
+    "prowler",
+    "scout-suite",
+    "cloudmapper",
+    "pacu",
+    "trivy",
+    "clair",
+    "kube-hunter",
+    "kube-bench",
+    "docker-bench-security",
+    "falco",
+    "checkov",
+    "terrascan",
+    "cloudsploit",
+    "kubectl",
+    "helm",
+    "istioctl",
+    "opa",
     # OSINT and bug bounty
-    "aquatone", "subjack", "sherlock", "social-analyzer", "recon-ng", "maltego",
-    "spiderfoot", "shodan", "censys", "trufflehog",
+    "aquatone",
+    "subjack",
+    "sherlock",
+    "social-analyzer",
+    "recon-ng",
+    "maltego",
+    "spiderfoot",
+    "shodan",
+    "censys",
+    "trufflehog",
     # Wireless and post-exploitation
-    "aircrack-ng", "airmon-ng", "airodump-ng", "aireplay-ng", "mimikatz",
-    "impacket", "psexec.py", "wmiexec.py", "smbexec.py", "secretsdump.py", "ntlmrelayx.py",
+    "aircrack-ng",
+    "airmon-ng",
+    "airodump-ng",
+    "aireplay-ng",
+    "mimikatz",
+    "impacket",
+    "psexec.py",
+    "wmiexec.py",
+    "smbexec.py",
+    "secretsdump.py",
+    "ntlmrelayx.py",
     # Tunneling, proxy, phishing frameworks
-    "proxychains", "proxychains4", "chisel", "evilginx2",
+    "proxychains",
+    "proxychains4",
+    "chisel",
+    "evilginx2",
     # AD / C2 / post-exploitation frameworks
-    "bloodhound", "bloodhound-python", "sharpound", "sharphound", "rubeus",
-    "powersploit", "powerview", "seatbelt", "pupy", "sliver", "sliver-server",
-    "cobalt", "cobaltstrike", "cobalt-strike", "mythic", "donut", "avalon",
+    "bloodhound",
+    "bloodhound-python",
+    "sharpound",
+    "sharphound",
+    "rubeus",
+    "powersploit",
+    "powerview",
+    "seatbelt",
+    "pupy",
+    "sliver",
+    "sliver-server",
+    "cobalt",
+    "cobaltstrike",
+    "cobalt-strike",
+    "mythic",
+    "donut",
+    "avalon",
     # Additional recon/web tools
-    "rustscan", "naabu", "httpx", "katana", "feroxbuster", "arjun", "tplmap",
-    "nosqlmap", "joomscan", "wpscan", "droopescan", "cmseek",
+    "rustscan",
+    "naabu",
+    "httpx",
+    "katana",
+    "feroxbuster",
+    "arjun",
+    "tplmap",
+    "nosqlmap",
+    "joomscan",
+    "wpscan",
+    "droopescan",
+    "cmseek",
     # Network / IoT / mitm
-    "routersploit", "bettercap",
+    "routersploit",
+    "bettercap",
     # DFIR / reverse / mobile
-    "hashdeep", "foremost", "volatility", "rekall", "autopsy", "sleuthkit",
-    "sleuth", "tsk", "binwalk", "radare2", "ghidra", "cutter", "frida",
-    "objection", "qark", "mobsf", "androbugs",
+    "hashdeep",
+    "foremost",
+    "volatility",
+    "rekall",
+    "autopsy",
+    "sleuthkit",
+    "sleuth",
+    "tsk",
+    "binwalk",
+    "radare2",
+    "ghidra",
+    "cutter",
+    "frida",
+    "objection",
+    "qark",
+    "mobsf",
+    "androbugs",
     # Common packet/capture tools
-    "wireshark", "tshark", "tcpdump",
+    "wireshark",
+    "tshark",
+    "tcpdump",
 }
 
-VersionInfo = namedtuple('VersionInfo', ['major', 'minor', 'micro'])
+VersionInfo = namedtuple("VersionInfo", ["major", "minor", "micro"])
 VERSION_INFO = VersionInfo(1, 0, 2)
-VERSION = '.'.join(map(str, VERSION_INFO))  # convert to string form, like: '1.2.3'
+VERSION = ".".join(map(str, VERSION_INFO))  # convert to string form, like: '1.2.3'
 
 CLI_START_MESSAGE = f"""
 
@@ -144,6 +346,7 @@ Type /help for special commands.
 # create typer app
 app = typer.Typer()
 
+
 @app.command()
 def repl(
     model: Annotated[
@@ -156,7 +359,11 @@ def repl(
     ] = None,
     device: Annotated[
         str,
-        typer.Option("--device", "-d", help="Device to use for chatbot, e.g. gpu, amd, nvidia, intel. Defaults to CPU."),
+        typer.Option(
+            "--device",
+            "-d",
+            help="Device to use for chatbot, e.g. gpu, amd, nvidia, intel. Defaults to CPU.",
+        ),
     ] = None,
     hexstrike_url: Annotated[
         str,
@@ -168,19 +375,29 @@ def repl(
     ] = DEFAULT_HEXSTRIKE_ENDPOINT,
     auto_start_hexstrike: Annotated[
         bool,
-        typer.Option("--auto-start-hexstrike/--no-auto-start-hexstrike", help="Auto-start Hexstrike server if not running."),
+        typer.Option(
+            "--auto-start-hexstrike/--no-auto-start-hexstrike",
+            help="Auto-start Hexstrike server if not running.",
+        ),
     ] = True,
     hexstrike_repo: Annotated[
         str,
-        typer.Option("--hexstrike-repo", help="Path to local Hexstrike repo containing hexstrike_server.py."),
+        typer.Option(
+            "--hexstrike-repo",
+            help="Path to local Hexstrike repo containing hexstrike_server.py.",
+        ),
     ] = DEFAULT_HEXSTRIKE_REPO,
     python_exe: Annotated[
         str,
-        typer.Option("--python-exe", help="Python executable to start Hexstrike server."),
+        typer.Option(
+            "--python-exe", help="Python executable to start Hexstrike server."
+        ),
     ] = sys.executable,
     server_start_timeout: Annotated[
         int,
-        typer.Option("--server-start-timeout", help="Seconds to wait for server startup."),
+        typer.Option(
+            "--server-start-timeout", help="Seconds to wait for server startup."
+        ),
     ] = 120,
     hexstrike_input: Annotated[
         str,
@@ -214,7 +431,9 @@ def repl(
 
     normalized_input_mode = (hexstrike_input or "").strip().lower()
     if normalized_input_mode not in {"user", "assistant", "both"}:
-        raise typer.BadParameter("--hexstrike-input must be one of: user, assistant, both")
+        raise typer.BadParameter(
+            "--hexstrike-input must be one of: user, assistant, both"
+        )
 
     _assert_hexstrike_available(
         base_url=hexstrike_url,
@@ -292,14 +511,37 @@ def _start_hexstrike_server(repo_path: Path, python_exe: str):
     server_env = os.environ.copy()
     server_env.setdefault("PYTHONUTF8", "1")
     server_env.setdefault("PYTHONIOENCODING", "utf-8")
-    subprocess.Popen(
+
+    import tempfile
+
+    log_dir = Path(tempfile.gettempdir())
+    stdout_log = log_dir / "hexstrike_stdout.log"
+    stderr_log = log_dir / "hexstrike_stderr.log"
+
+    proc = subprocess.Popen(
         [python_exe, "-X", "utf8", str(server_script)],
         cwd=str(repo_path),
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=open(stdout_log, "w"),
+        stderr=open(stderr_log, "w"),
         env=server_env,
         creationflags=creationflags,
     )
+
+    time.sleep(2)
+    if proc.poll() is not None:
+        stderr_content = ""
+        if stderr_log.exists():
+            try:
+                with open(stderr_log, "r") as f:
+                    stderr_content = f.read(500)
+            except Exception:
+                pass
+        raise typer.BadParameter(
+            f"Hexstrike server failed to start. Check logs:\nstdout: {stdout_log}\nstderr: {stderr_log}\n{stderr_content}"
+        )
+        raise typer.BadParameter(
+            f"Hexstrike server failed to start. Check logs:\nstdout: {stdout_log}\nstderr: {stderr_log}\n{stderr_content[:500]}"
+        )
 
 
 def _assert_hexstrike_available(
@@ -351,11 +593,15 @@ def _print_hexstrike_response(data):
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
 
-def _build_hexstrike_input(user_message: str, assistant_message: str, input_mode: str) -> str:
+def _build_hexstrike_input(
+    user_message: str, assistant_message: str, input_mode: str
+) -> str:
     if input_mode == "assistant":
         return assistant_message
     if input_mode == "both":
-        return f"User request:\n{user_message}\n\nAssistant response:\n{assistant_message}"
+        return (
+            f"User request:\n{user_message}\n\nAssistant response:\n{assistant_message}"
+        )
     return user_message
 
 
@@ -378,8 +624,7 @@ def _clean_assistant_command(text: str) -> str:
         return stripped
 
     stripped = (
-        stripped
-        .replace("```bash", "")
+        stripped.replace("```bash", "")
         .replace("```sh", "")
         .replace("```cmd", "")
         .replace("```powershell", "")
@@ -389,13 +634,43 @@ def _clean_assistant_command(text: str) -> str:
     )
 
     known_cmd_heads = {
-        "netstat", "tasklist", "wmic", "ipconfig", "systeminfo", "findstr",
-        "powershell", "pwsh", "Get-NetTCPConnection", "Get-Process", "Get-Service",
-        "Get-ChildItem", "curl", "nmap", "ss", "lsof", "ps",
+        "netstat",
+        "tasklist",
+        "wmic",
+        "ipconfig",
+        "systeminfo",
+        "findstr",
+        "powershell",
+        "pwsh",
+        "Get-NetTCPConnection",
+        "Get-Process",
+        "Get-Service",
+        "Get-ChildItem",
+        "curl",
+        "nmap",
+        "ss",
+        "lsof",
+        "ps",
     }
     non_command_starts = {
-        "sure", "here", "to", "you", "this", "run", "use", "try", "i", "we", "let",
-        "the", "a", "an", "first", "then", "note", "please",
+        "sure",
+        "here",
+        "to",
+        "you",
+        "this",
+        "run",
+        "use",
+        "try",
+        "i",
+        "we",
+        "let",
+        "the",
+        "a",
+        "an",
+        "first",
+        "then",
+        "note",
+        "please",
     }
 
     candidates = []
@@ -409,7 +684,10 @@ def _clean_assistant_command(text: str) -> str:
             line = line[2:].strip()
         if ":" in line:
             left, right = line.split(":", 1)
-            if left.strip().lower() in {"command", "cmd", "powershell", "bash", "sh"} and right.strip():
+            if (
+                left.strip().lower() in {"command", "cmd", "powershell", "bash", "sh"}
+                and right.strip()
+            ):
                 line = right.strip()
         candidates.append(line)
 
@@ -425,7 +703,11 @@ def _clean_assistant_command(text: str) -> str:
         first = words[0].lower().rstrip(",.:;")
         if first in non_command_starts:
             continue
-        if len(words) >= 2 and first == "for" and words[1].lower() in {"example", "instance"}:
+        if (
+            len(words) >= 2
+            and first == "for"
+            and words[1].lower() in {"example", "instance"}
+        ):
             continue
         return line
 
@@ -453,7 +735,7 @@ def _normalize_head_token(token: str) -> str:
 
 
 def _extract_command_heads(command_text: str) -> list[str]:
-    normalized = (command_text or "")
+    normalized = command_text or ""
     for sep in ["\r", "\n", "|", ";", "&&", "||"]:
         normalized = normalized.replace(sep, "&")
 
@@ -465,7 +747,11 @@ def _extract_command_heads(command_text: str) -> list[str]:
             continue
 
         first = _normalize_head_token(parts[0])
-        if first == "cmd" and len(parts) >= 3 and _normalize_head_token(parts[1]) == "/c":
+        if (
+            first == "cmd"
+            and len(parts) >= 3
+            and _normalize_head_token(parts[1]) == "/c"
+        ):
             first = _normalize_head_token(parts[2])
         elif first in {"powershell", "pwsh"} and len(parts) >= 2:
             # keep powershell as the executable head itself
@@ -488,7 +774,9 @@ def _requires_user_approval(command_text: str) -> bool:
 
 
 def _confirm_command_execution(command_text: str) -> bool:
-    answer = input(f"Approve command execution? [{command_text}] (y/N): ").strip().lower()
+    answer = (
+        input(f"Approve command execution? [{command_text}] (y/N): ").strip().lower()
+    )
     return answer in {"y", "yes"}
 
 
@@ -511,7 +799,7 @@ def _old_loop(
         # if regular message, append to messages
         MESSAGES.append({"role": "user", "content": message})
 
-        # execute chat completion and ignore the full response since 
+        # execute chat completion and ignore the full response since
         # we are outputting it incrementally
         full_response = blk_hat_instance.chat_completion(
             MESSAGES,
@@ -549,7 +837,9 @@ def _old_loop(
             and _requires_user_approval(hexstrike_payload)
             and not _confirm_command_execution(hexstrike_payload)
         ):
-            print('{"success": false, "cancelled": true, "reason": "User denied command execution"}')
+            print(
+                '{"success": false, "cancelled": true, "reason": "User denied command execution"}'
+            )
             print()
             continue
         hexstrike_response = _send_to_hexstrike(
@@ -562,7 +852,8 @@ def _old_loop(
             and isinstance(hexstrike_response, dict)
             and not hexstrike_response.get("success")
             and isinstance(hexstrike_response.get("stderr"), str)
-            and "syntax of the command is incorrect" in hexstrike_response["stderr"].lower()
+            and "syntax of the command is incorrect"
+            in hexstrike_response["stderr"].lower()
         ):
             mapped_fallback = _derive_platform_command(message)
             if mapped_fallback and mapped_fallback != hexstrike_payload:
@@ -573,7 +864,7 @@ def _old_loop(
                 )
         if hexstrike_response is not None:
             _print_hexstrike_response(hexstrike_response)
-        print() # newline before next prompt
+        print()  # newline before next prompt
 
 
 def _new_loop(
@@ -596,7 +887,7 @@ def _new_loop(
             # if regular message, append to messages
             MESSAGES.append({"role": "user", "content": message})
 
-            # execute chat completion and ignore the full response since 
+            # execute chat completion and ignore the full response since
             # we are outputting it incrementally
             response_generator = blk_hat_instance.generate(
                 message,
@@ -615,11 +906,11 @@ def _new_loop(
             response = io.StringIO()
             for token in response_generator:
                 if not results_only:
-                    print(token, end='', flush=True)
+                    print(token, end="", flush=True)
                 response.write(token)
 
             # record assistant's response to messages
-            response_message = {'role': 'assistant', 'content': response.getvalue()}
+            response_message = {"role": "assistant", "content": response.getvalue()}
             response.close()
             blk_hat_instance.current_chat_session.append(response_message)
             MESSAGES.append(response_message)
@@ -637,7 +928,9 @@ def _new_loop(
                 and _requires_user_approval(hexstrike_payload)
                 and not _confirm_command_execution(hexstrike_payload)
             ):
-                print('{"success": false, "cancelled": true, "reason": "User denied command execution"}')
+                print(
+                    '{"success": false, "cancelled": true, "reason": "User denied command execution"}'
+                )
                 print()
                 continue
             hexstrike_response = _send_to_hexstrike(
@@ -650,7 +943,8 @@ def _new_loop(
                 and isinstance(hexstrike_response, dict)
                 and not hexstrike_response.get("success")
                 and isinstance(hexstrike_response.get("stderr"), str)
-                and "syntax of the command is incorrect" in hexstrike_response["stderr"].lower()
+                and "syntax of the command is incorrect"
+                in hexstrike_response["stderr"].lower()
             ):
                 mapped_fallback = _derive_platform_command(message)
                 if mapped_fallback and mapped_fallback != hexstrike_payload:
@@ -661,7 +955,7 @@ def _new_loop(
                     )
             if hexstrike_response is not None:
                 _print_hexstrike_response(hexstrike_response)
-            print() # newline before next prompt
+            print()  # newline before next prompt
 
 
 @app.command()
@@ -672,5 +966,3 @@ def version():
 
 if __name__ == "__main__":
     app()
-
-
