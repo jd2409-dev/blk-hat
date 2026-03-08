@@ -6,7 +6,7 @@ This snippet is the working path for this repo as of 2026-03-07.
 
 - Python 3.9+
 - Git
-- Ollama installed (`ollama --version`)
+- GPT4All Python package and a local model file
 
 ## 2) One-time setup
 
@@ -15,61 +15,42 @@ cd C:\Users\Jaydan\hexstrike
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install requests
+python -m pip install gpt4all typer requests
+python -m pip install -r .\hexstrike\requirements.txt
 ```
 
-## 3) Start Ollama and pull a model
+## 3) Start Hexstrike server
 
 ```powershell
-ollama serve
+python .\hexstrike\hexstrike_server.py
 ```
 
-In a second terminal:
+## 4) Run BLK-HAT CLI
 
 ```powershell
-ollama pull llama3.2
-```
-
-## 4) Save config (works even if `.\hexstrike` is missing initially)
-
-```powershell
-python .\ollama_hexstrike_cli.py --config `
-  --ollama-mode api `
-  --ollama-url http://localhost:11434/api/generate `
-  --model llama3.2 `
-  --hexstrike-url http://localhost:8888 `
-  --hexstrike-endpoint /api/intelligence/analyze-target `
+python .\blk_hat_app.py repl `
+  --model mistral-7b-instruct-v0.1.Q4_0.gguf `
+  --hexstrike-url http://127.0.0.1:8888 `
+  --hexstrike-endpoint /api/command `
   --hexstrike-repo .\hexstrike
 ```
 
-## 5) Run (recommended)
+## 5) Launchers
 
-This command auto-clones Hexstrike if missing, installs Hexstrike deps, and auto-starts Hexstrike:
+`.\blk-hat.cmd` and `.\hexstrike.cmd` run `blk_hat_app.py repl`.
 
-```powershell
-python .\ollama_hexstrike_cli.py `
-  --clone-hexstrike `
-  --auto-start-hexstrike `
-  --install-hexstrike-deps `
-  --prompt "Analyze scan approach for example.com"
-```
-
-## 6) Equivalent launcher
-
-```powershell
-.\run_hexstrike.bat --clone-hexstrike --prompt "Analyze scan approach for example.com"
-```
-
-## Optional: BLK-HAT wrapper
-
-`.\blk-hat.cmd` / `.\hexstrike.cmd` runs `blk_hat_app.py repl`. It also requires:
+They require:
 - Python packages: `typer`, `requests`, and `gpt4all`
 - A local GPT4All model file matching the default name in `blk_hat_app.py`
 
 ## Troubleshooting
 
-- Add `--verbose` to `ollama_hexstrike_cli.py` for detailed logs.
-- If Ollama is unreachable, verify `http://localhost:11434`.
+- Add `--help` to inspect available CLI options:
+
+```powershell
+python .\blk_hat_app.py repl --help
+```
+
 - If Hexstrike startup fails, run it manually from `.\hexstrike`:
 
 ```powershell
