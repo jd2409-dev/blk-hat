@@ -67,9 +67,19 @@ chmod +x blk-hat
 ```
 
 Notes:
+- `blk-hat` is a Linux-friendly shell wrapper that mirrors the `blk-hat.cmd` behavior, so you can run the same commands without Wine.
+- A companion `hexstrike.sh` simply forwards to `./blk-hat`, just like `hexstrike.cmd` does on Windows; make both scripts executable before use (`chmod +x blk-hat hexstrike.sh`).
 - If your model filename differs, pass it with `--model`.
 - On first run, GPT4All may download models to user cache.
 - Use `--no-auto-start-hexstrike` if you manage server startup manually.
+
+## Linux launchers
+
+The repository includes native shell scripts that replace the Windows `.cmd` entry points so everything works when you say `blk-hat`:
+
+- `./blk-hat` performs Python dependency checks, auto-starts the Hexstrike server if needed, and executes `blk_hat_app.py`, mirroring the Windows functionality without Wine.
+- `./hexstrike.sh` just changes into the repo root and execs `./blk-hat`, matching what `hexstrike.cmd` does when you call `hexstrike`.
+- Before first use, give them execute permission: `chmod +x blk-hat hexstrike.sh`.
 
 ## Quick Commands
 
